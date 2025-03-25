@@ -34,3 +34,20 @@ Resources:
       Environment:
         Variables:
           USER_POOL_ID: !Ref CognitoUserPool
+
+  UserSigninFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: UserSigninFunction
+      Handler: main
+      CodeUri: cmd/login
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:AdminCreateUser
+              Resource: !GetAtt CognitoUserPool.Arn
+      Environment:
+        Variables:
+          USER_POOL_ID: !Ref CognitoUserPool
