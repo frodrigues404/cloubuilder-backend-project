@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda register users
+
+Globals:
+  Function:
+    Runtime: provided.al2023
+    Timeout: 10
+    MemorySize: 128
+
+Resources:
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: UserPoolCadastro
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+
+  UserSignupFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: UserSignupFunction
+      Handler: main
+      CodeUri: cmd/register
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:AdminCreateUser
+              Resource: !GetAtt CognitoUserPool.Arn
+      Environment:
+        Variables:
+          USER_POOL_ID: !Ref CognitoUserPool
