@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Cost Tracker em Go com Lambda + API Gateway
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: provided.al2023
+
+Resources:
+  CostTrackerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main
+      CodeUri: .
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ce:GetCostAndUsage
+                - dynamodb:PutItem
+              Resource: "*"
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /costs
+            Method: get
+
+  CostTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: aws_costs
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
