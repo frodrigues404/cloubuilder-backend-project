@@ -55,15 +55,6 @@ module "cost_tracker_lambda" {
         {
             "Effect": "Allow",
             "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-                "secretsmanager:ListSecrets"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
                 "ce:GetCostAndUsage"
             ],
             "Resource": "*"
@@ -71,7 +62,6 @@ module "cost_tracker_lambda" {
     ]
 }
 EOF
-
   source_path = [
     {
       path = "${path.module}/cost-tracker"
@@ -85,6 +75,28 @@ EOF
       ]
     }
   ]
+
+  tags = local.tags
+}
+
+module "api_gateway" {
+  source  = "terraform-aws-modules/apigateway-v2/aws"
+  version = "5.2.0"
+
+  name                  = "${var.project}-${var.environment}-api"
+  description           = "${var.project} project API"
+  protocol_type         = "HTTP"
+  create_certificate    = false
+  create_domain_name    = false
+  create_domain_records = false
+
+  routes = {
+    "GET /week-costs" = {
+      integration = {
+        uri = module.cost_tracker_lambda.lambda_function_arn
+      }
+    },
+  }
 
   tags = local.tags
 }

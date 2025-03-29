@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	saveToDynamo "cost-tracker/dynamosave"
+	dynamosave "cost-tracker/dynamosave"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -52,7 +52,7 @@ func GetCosts() error {
 			service := group.Keys[0]
 			amount := group.Metrics["UnblendedCost"].Amount
 			ddb := dynamodb.NewFromConfig(cfg)
-			err := saveToDynamo.SaveToDynamo(ddb, *result.TimePeriod.Start, service, *amount)
+			err := dynamosave.SaveToDynamo(ddb, *result.TimePeriod.Start, service, *amount)
 			if err != nil {
 				fmt.Println("Erro salvando no Dynamo:", err)
 			}
